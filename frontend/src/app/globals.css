@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #0b0d19;
+    --foreground: #f8fafc;
+    --card: #121424;
+    --card-foreground: #f8fafc;
+    --popover: #121424;
+    --popover-foreground: #f8fafc;
+    --primary: #7C5CFF;
+    --primary-foreground: #ffffff;
+    --secondary: #22d3ee;
+    --secondary-foreground: #0b0d19;
+    --muted: #1e223d;
+    --muted-foreground: #94a3b8;
+    --accent: #1e223d;
+    --accent-foreground: #f8fafc;
+    --success: #22d3ee;
+    --success-foreground: #0b0d19;
+    --warning: #ff9e7d;
+    --warning-foreground: #0b0d19;
+    --error: #ff007a;
+    --error-foreground: #ffffff;
+    --border: #1e223d;
+    --radius: 16px;
+  }
+
+  .dark {
+    --background: #0b0d19;
+    --foreground: #f8fafc;
+    --card: #121424;
+    --card-foreground: #f8fafc;
+    --popover: #121424;
+    --popover-foreground: #f8fafc;
+    --primary: #7C5CFF;
+    --primary-foreground: #ffffff;
+    --secondary: #22d3ee;
+    --secondary-foreground: #0b0d19;
+    --muted: #1e223d;
+    --muted-foreground: #94a3b8;
+    --accent: #1e223d;
+    --accent-foreground: #f8fafc;
+    --success: #22d3ee;
+    --success-foreground: #0b0d19;
+    --warning: #ff9e7d;
+    --warning-foreground: #0b0d19;
+    --error: #ff007a;
+    --error-foreground: #ffffff;
+    --border: #1e223d;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom premium styles */
+.card-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+.glass {
+  background: rgba(18, 20, 36, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(124, 92, 255, 0.15);
+}
+
+/* Glowing animations */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.005); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s infinite ease-in-out;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0d19;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e223d;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7C5CFF;
+}
