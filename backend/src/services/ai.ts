@@ -7,7 +7,7 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 // Get generative model helper
 const getModel = () => {
   if (!genAI) return null;
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 };
 
 /**

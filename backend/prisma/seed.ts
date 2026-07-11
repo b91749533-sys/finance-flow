@@ -4,6 +4,15 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
+  const force = process.argv.includes('--force');
+  const userCount = await prisma.user.count();
+
+  if (userCount > 0 && !force) {
+    console.log('\n⚠️  Database already contains user data. Seeding aborted to prevent accidental data loss.');
+    console.log('👉 If you really want to reset the database and re-seed, run: npm run db:seed -- --force\n');
+    return;
+  }
+
   console.log('Seeding database...');
 
   // Clean existing data

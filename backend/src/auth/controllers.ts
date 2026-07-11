@@ -80,6 +80,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         name,
         passwordHash,
         verificationToken,
+        isVerified: true, // Auto-verify in development mode for seamless testing
         settings: {
           create: {
             theme: 'light',

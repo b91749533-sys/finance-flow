@@ -51,6 +51,20 @@ export default function Transactions() {
   const [isBulkCatOpen, setIsBulkCatOpen] = useState(false);
   const [bulkCatId, setBulkCatId] = useState('');
 
+  // Edit modal state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editTx, setEditTx] = useState({
+    id: '',
+    accountId: '',
+    categoryId: '',
+    amount: '',
+    type: 'EXPENSE',
+    date: '',
+    description: '',
+    notes: '',
+    tags: '',
+  });
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -205,6 +219,27 @@ export default function Transactions() {
       loadData();
     } catch (err: any) {
       showToast('Error', err.response?.data?.message || 'Failed to attach receipt.', 'error');
+    }
+  };
+
+  const handleEditTransactionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { accountId, amount, description } = editTx;
+    if (!accountId || !amount || !description) {
+      showToast('Validation Warning', 'Please specify account, amount and description.', 'warning');
+      return;
+    }
+
+    try {
+      await api.put(`/transactions/${editTx.id}`, {
+        ...editTx,
+        tags: editTx.tags ? editTx.tags.split(',').map(t => t.trim()) : [],
+      });
+      showToast('Transaction Updated', 'Successfully updated transaction.', 'success');
+      setIsEditOpen(false);
+      loadData();
+    } catch (err: any) {
+      showToast('Error', err.response?.data?.message || 'Could not update transaction.', 'error');
     }
   };
 
@@ -413,6 +448,26 @@ export default function Transactions() {
                               }`}
                             >
                               <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditTx({
+                                  id: tx.id,
+                                  accountId: tx.accountId,
+                                  categoryId: tx.categoryId || '',
+                                  amount: String(tx.amount),
+                                  type: tx.type,
+                                  date: new Date(tx.date).toISOString().split('T')[0],
+                                  description: tx.description,
+                                  notes: tx.notes || '',
+                                  tags: tx.tags.join(', '),
+                                });
+                                setIsEditOpen(true);
+                              }}
+                              title="Edit transaction"
+                              className="p-1.5 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-500 rounded-lg transition"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={async () => {
@@ -644,6 +699,148 @@ export default function Transactions() {
                     className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-xs transition"
                   >
                     Attach Receipt
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {isEditOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEditOpen(false)}
+              className="fixed inset-0 bg-black"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-w-md w-full rounded-2xl card-shadow overflow-hidden z-10"
+            >
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <h3 className="font-bold text-base text-slate-900 dark:text-white">Edit Transaction</h3>
+                <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleEditTransactionSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type</label>
+                    <select
+                      value={editTx.type}
+                      onChange={(e) => setEditTx(prev => ({ ...prev, type: e.target.value }))}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                    >
+                      <option value="EXPENSE">Expense</option>
+                      <option value="INCOME">Income</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Amount (DH)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={editTx.amount}
+                      onChange={(e) => setEditTx(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="0.00"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Description</label>
+                  <input
+                    type="text"
+                    required
+                    value={editTx.description}
+                    onChange={(e) => setEditTx(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="e.g. Starbucks Coffee"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account</label>
+                    <select
+                      value={editTx.accountId}
+                      onChange={(e) => setEditTx(prev => ({ ...prev, accountId: e.target.value }))}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                    >
+                      {accounts.map(acc => (
+                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
+                    <select
+                      value={editTx.categoryId}
+                      onChange={(e) => setEditTx(prev => ({ ...prev, categoryId: e.target.value }))}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                    >
+                      <option value="">Auto-Detect (AI)</option>
+                      {categories.filter(c => c.type === editTx.type).map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</label>
+                    <input
+                      type="date"
+                      value={editTx.date}
+                      onChange={(e) => setEditTx(prev => ({ ...prev, date: e.target.value }))}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tags (comma-separated)</label>
+                    <input
+                      type="text"
+                      value={editTx.tags}
+                      onChange={(e) => setEditTx(prev => ({ ...prev, tags: e.target.value }))}
+                      placeholder="coffee, monthly"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Notes</label>
+                  <textarea
+                    value={editTx.notes}
+                    onChange={(e) => setEditTx(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Attach short notes..."
+                    rows={2}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white"
+                  />
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditOpen(false)}
+                    className="flex-1 py-2.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-semibold transition text-slate-700 dark:text-slate-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition"
+                  >
+                    Save Changes
                   </button>
                 </div>
               </form>
